@@ -7,7 +7,6 @@ import org.example.BuilderControlFlowGraph.ControlFlowGraphBuilder
 import org.example.ConstantFolding.ConstantFolding
 import org.example.Mermaid.MermaidBuilder
 import org.example.Mermaid.MermaidGraphType
-//import org.example.Mermaid.RenderGraphIntoMermaid
 import org.example.Node.Node
 import org.example.Node.getSuccessors
 import org.example.Statement.Stmt
