@@ -18,8 +18,6 @@ internal class ConstantFoldingTest {
     }
 
 
-    // --- Tests ---
-
     @Test
     fun `folds simple constant expression in assign`() {
         // x = 1 + 2
@@ -80,7 +78,7 @@ internal class ConstantFoldingTest {
         // return x
         val ast = block(
             Stmt.If(
-                const(true), // Условие неважно для этого теста
+                const(true),
                 block(Stmt.Assign(v("x"), const(1))),
                 block(Stmt.Assign(v("x"), const(2)))
             ),
@@ -110,9 +108,6 @@ internal class ConstantFoldingTest {
             Stmt.Return(v("x"))
         )
         val optCfg = runFold(ast)
-
-        // Анализ: merge(Const(5), Const(5)) -> Const(5)
-        // ОжидаTем: return 5
         val cond = optCfg as Node.Condition
         val ret = cond.join as Node.Return
 
@@ -122,11 +117,11 @@ internal class ConstantFoldingTest {
     @Test
     fun `folds constant expression in If condition and propagates state through merge`() {
         // y = 2
-        // if (10 < 20)  // Свернется в true
+        // if (10 < 20) 
         //        x = 1
         // else
         //        x = 2
-        // return 5 + 6 - y  // Должен свернуться в 5 + 6 - 2 = 9
+        // return 5 + 6 - y  
         //
         val ast = block(
             Stmt.Assign(v("y"), const(2)),
@@ -169,7 +164,7 @@ internal class ConstantFoldingTest {
         val optCfg = runFold(ast)
 
         val assign = optCfg as Node.Assign
-        assign.assertAssignConst(0) // x = 0
+        assign.assertAssignConst(0) 
 
         val cycle = assign.next as Node.While
 
@@ -205,16 +200,14 @@ internal class ConstantFoldingTest {
 
         val optCfg = runFold(ast)
 
-        // x = 0 свернулся
+
         val assign = optCfg as Node.Assign
         assign.assertAssignConst(0)
 
-        // cond свернулся в 6, тело стало Quit
+     
         val cycle = assign.next as Node.While
         cycle.cond.assertExprConst(true)
 
-
-        // после цикла x — Unknown ⇒ return x (а не Const)
         val ret = cycle.join as Node.Return
         assertTrue(ret.result is Expr.Var)
         assertEquals(v("x"), ret.result)
