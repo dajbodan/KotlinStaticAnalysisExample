@@ -8,23 +8,20 @@ import org.example.Statement.Visitor.StmtVisitor
 
 
 
-/**
- * Prints the AST with indentation for structural blocks (Stmt)
- * and inline printing for expressions (Expr).
- */
+
 internal class ASTConsolePrinter(
     private val out: Appendable = System.out
 ) : ExprVisitor<Unit>, StmtVisitor<Unit> {
 
     private var indentLevel = 0
-    private val indentChar = "\t" // Using tabs
+    private val indentChar = "\t" 
 
-    /** Helper to print the current indentation */
+  
     private fun indent() {
         out.append(indentChar.repeat(indentLevel))
     }
 
-    /** Helper to increase indentation and execute a block */
+    
     private inline fun indented(block: () -> Unit) {
         indentLevel++
         block()
