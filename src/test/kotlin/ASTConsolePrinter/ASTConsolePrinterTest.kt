@@ -11,7 +11,6 @@ internal class ASTConsolePrinterTest {
 
     @Test
     fun `prints a simple assignment`() {
-        // Setup
         val sb = StringBuilder()
         val printer = ASTConsolePrinter(sb)
         val ast = block(
