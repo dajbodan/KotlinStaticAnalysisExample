@@ -21,7 +21,6 @@ internal fun eq(l: Expr, r: Expr): Expr.Eq = Expr.Eq(l, r)
 // Helper Assertions for Readability
 internal fun Node.assertAssignConst(expectedValue: Any) {
     assertTrue(this is Node.Assign, "Node is not assign node but it's $this")
-    // Мы можем рекурсивно вызвать другое расширение!
     (this as Node.Assign).value.assertExprConst(expectedValue)
 }
 
