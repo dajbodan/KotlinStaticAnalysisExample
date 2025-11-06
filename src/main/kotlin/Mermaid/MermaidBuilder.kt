@@ -59,7 +59,6 @@ internal class MermaidBuilder(
         fun generateVertices(node: N) {
             if (!visited.contains(node)) {
                 visited.add(node)
-                // 'this.addNode' or just 'addNode'
                 addNode(node)
                 graphAlgorithm(node).forEach { generateVertices(it.first) }
             }
