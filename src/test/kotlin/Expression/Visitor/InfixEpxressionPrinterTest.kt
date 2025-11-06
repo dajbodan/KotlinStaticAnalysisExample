@@ -28,7 +28,6 @@ internal class InfixExpresionPrinterTest {
         // 1 + 2
         val ast = plus(const(1), const(2))
         val result = printer.print(ast)
-        // Your code adds parentheses for Plus/Minus
         assertEquals("(1+2)", result)
     }
 
@@ -37,7 +36,6 @@ internal class InfixExpresionPrinterTest {
         // 1 * 2
         val ast = mul(const(1), const(2))
         val result = printer.print(ast)
-        // Your code does not add parentheses for Mul
         assertEquals("1*2", result)
     }
 
@@ -57,11 +55,6 @@ internal class InfixExpresionPrinterTest {
             minus(v("y"), const(3))
         )
         val result = printer.print(ast)
-
-        // This test verifies your parentheses rules
-        // (x+2) comes from visitPlus
-        // (y-3) comes from visitMinus
-        // * comes from visitMul
         assertEquals("(x+2)*(y-3)", result)
     }
 
