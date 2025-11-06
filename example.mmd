@@ -1,0 +1,16 @@
+graph TD
+N0["Assign x = 125 "]
+N1["Assign a = (1-2)*(x+1) "]
+N2["While ((x+2)==(a+5)) "]
+N3["If (a) "]
+N4["Assign y = 1*1 "]
+N5["Assign y = 1 "]
+N6["Return ((x*2+y)) "]
+    N0 --> N1
+    N1 --> N2
+    N2 -->|Yes| N3
+    N3 -->|Yes| N4
+    N4 --> N2
+    N3 -->|No| N5
+    N5 --> N2
+    N2 -->|No| N6
