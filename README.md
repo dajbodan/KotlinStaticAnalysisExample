@@ -6,7 +6,7 @@ This project is a static analyzer for a simple imperative language. It demonstra
 * Data-Flow Analysis (specifically, a "must-analysis")
 * Constant Propagation and Folding optimization
 
-## 🚀 How to Run the Demo
+## How to Run the Demo
 
 The main demonstration is handled by the `Main.kt` file.
 
@@ -19,7 +19,7 @@ This will print a full report to the console, showing the original AST, the unop
 
 ---
 
-## 🧠 Solution Details & Comments
+## Solution Details & Comments
 
 This is where you can write the explanations you wanted to put in the notebook.
 
