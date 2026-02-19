@@ -62,25 +62,3 @@ sealed interface Node
         override fun <T> visit(visitor: NodeVisitor<T>) = visitor.visitQuit(this)
     }
 }
-
-/*fun getSuccessors(node: Node): List<Pair<Node, CFGWeights?>> {
-    return when (node) {
-
-        is Node.Assign -> listOf(node.next to null)
-
-
-        is Node.Return -> emptyList()
-        is Node.Quit -> emptyList()
-
-
-        is Node.Condition -> listOf(
-            node.nextIfTrue to CFGWeights.YES,
-            node.nextIfFalse to CFGWeights.NO
-        )
-
-        is Node.While -> listOf(
-            node.body to CFGWeights.YES,
-            node.join to CFGWeights.NO
-        )
-    }
-}*/

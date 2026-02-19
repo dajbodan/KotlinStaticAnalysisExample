@@ -3,6 +3,7 @@ package org.example.analysis
 import org.example.lang.ast.Expr
 import org.example.lang.cfg.Node
 import org.example.lang.cfg.NodeVisitor
+import java.util.Collections.emptyMap
 
 internal class ConstantFolding(val root : Node)
 {
@@ -39,10 +40,7 @@ internal class ConstantFolding(val root : Node)
 
             val predecessor = predeccesor[itNode] ?: emptyList<Node>()
 
-            val predOutStates = predecessor.map { prevNode ->
-                nodesOfVariable.getValue(prevNode)
-            }
-
+            val predOutStates = predecessor.map { envAt(it) }
 
             val inState = if (itNode == root) {
                 merge(predOutStates + listOf(mutableMapOf()))
@@ -98,14 +96,14 @@ internal class ConstantFolding(val root : Node)
         {
             val values = states.mapNotNull { it[key] }.toSet()
             result[key] = if (values.size == 1) {
-                values.first() ?: AValue.Unknown
+                values.first()
             } else {
                 AValue.Unknown
             }
         }
-
         return result
     }
+
 
 
     private fun evaluate(e: Expr, context : Env) : AValue<Any> = when(e) {
@@ -134,13 +132,17 @@ internal class ConstantFolding(val root : Node)
         }
         return AValue.Unknown
     }
+    private fun envAt(n: Node): Env =
+        nodesOfVariable[n] ?: emptyMap()
 
+    private fun valueAt(n: Node, key: AEnvVariable): AValue<Any> =
+        envAt(n)[key] ?: AValue.Unknown
     private inner class ConstantFoldingVisitor() : NodeVisitor<Node>
     {
         private val cycles = mutableMapOf<Node, Node>()
 
         override fun visitAssign(x: Node.Assign): Node {
-            val tempValue = nodesOfVariable.getValue(x).getValue(AEnvVariable.Var(x.variable.name))
+            val tempValue = valueAt(x, AEnvVariable.Var(x.variable.name))
             val tempNext = x.next.visit(this)
 
             if (tempValue is AValue.Const)
@@ -150,9 +152,8 @@ internal class ConstantFolding(val root : Node)
         }
 
         override fun visitCycle(X: Node.While): Node {
-            if( cycles.contains(X))
-                return cycles.getValue(X)
-            val tempValue = nodesOfVariable.getValue(X).getValue(AEnvVariable.ConstExpr(X))
+            cycles[X]?.let { return it }
+            val tempValue = valueAt(X, AEnvVariable.ConstExpr(X))
             val tempJoin = X.join.visit(this)
             var tempCycle : Node? = null
             if (tempValue is AValue.Const)
@@ -168,7 +169,7 @@ internal class ConstantFolding(val root : Node)
         override fun visitConditional(x: Node.Condition): Node {
             val nextIfTrue = x.nextIfTrue.visit(this)
             val nextIfFalse = x.nextIfFalse.visit(this)
-            val tempValue = nodesOfVariable.getValue(x).getValue(AEnvVariable.ConstExpr(x))
+            val tempValue = valueAt(x, AEnvVariable.ConstExpr(x))
             val tempJoin = x.join.visit(this)
             if(tempValue is AValue.Const)
                 return Node.Condition(Expr.Const(tempValue.value), nextIfTrue, nextIfFalse, tempJoin)
@@ -180,7 +181,7 @@ internal class ConstantFolding(val root : Node)
 
         override fun visitReturn(x: Node.Return): Node {
 
-            val tempValue = nodesOfVariable.getValue(x).getValue(AEnvVariable.ConstExpr(x))
+            val tempValue = valueAt(x, AEnvVariable.ConstExpr(x))
             if(tempValue is AValue.Const)
                 return Node.Return(Expr.Const(tempValue.value))
             return Node.Return(x.result)
