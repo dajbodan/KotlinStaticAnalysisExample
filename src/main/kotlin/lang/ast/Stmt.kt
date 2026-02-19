@@ -1,7 +1,6 @@
-package org.example.Statement
+package org.example.lang.ast
 
-import org.example.Expression.Expr
-import org.example.Statement.Visitor.StmtVisitor
+import org.example.lang.ast.visitor.StmtVisitor
 
 sealed interface Stmt {
     fun <T> accept(x: StmtVisitor<T>): T

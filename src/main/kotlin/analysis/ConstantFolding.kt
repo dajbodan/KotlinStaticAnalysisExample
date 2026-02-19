@@ -1,11 +1,8 @@
-package org.example.ConstantFolding
+package org.example.analysis
 
-import org.example.Expression.Expr
-import org.example.Node.Node
-import org.example.Node.NodeVisitor
-
-import kotlin.collections.plus
-
+import org.example.lang.ast.Expr
+import org.example.lang.cfg.Node
+import org.example.lang.cfg.NodeVisitor
 
 internal class ConstantFolding(val root : Node)
 {
@@ -43,7 +40,7 @@ internal class ConstantFolding(val root : Node)
             val predecessor = predeccesor[itNode] ?: emptyList<Node>()
 
             val predOutStates = predecessor.map { prevNode ->
-                nodesOfVariable[prevNode]!!
+                nodesOfVariable.getValue(prevNode)
             }
 
 
@@ -59,15 +56,7 @@ internal class ConstantFolding(val root : Node)
             if(oldOutState != newOutState)
             {
                 nodesOfVariable[itNode] = newOutState
-                when(itNode)
-                {
-                    is Node.Assign      ->   AssignHandler( itNode)
-                    is Node.Return      ->   ReturnHanlder( itNode)
-                    is Node.While       ->   CycleHandler( itNode)
-                    is Node.Condition   ->   ConditionHandler( itNode)
-                    is Node.Quit        ->  error("Error: Node.Quit is reached")
-                    else -> error("Error: Missed type")
-                }
+                itNode.successors().forEach { if(!que.contains(it)) que.addLast(it) }
             }
         }
 
@@ -75,29 +64,6 @@ internal class ConstantFolding(val root : Node)
 
 
     fun buildNewAST() : Node = root.visit(ConstantFoldingVisitor())
-
-
-    private fun AssignHandler ( assignNode : Node.Assign ) : Unit
-    {
-        if (!que.contains(assignNode.next)) que.addLast(assignNode.next)
-    }
-
-    private fun ReturnHanlder (returnNode : Node.Return ) : Unit
-    {
-
-    }
-
-    private fun CycleHandler ( cycleNode : Node.While ) : Unit
-    {
-        if (!que.contains(cycleNode.body)) que.addLast(cycleNode.body)
-        if (!que.contains(cycleNode.join)) que.addLast(cycleNode.join)
-    }
-
-    private fun ConditionHandler ( conditionNode : Node.Condition ) : Unit
-    {
-        if (!que.contains(conditionNode.nextIfTrue)) que.addLast(conditionNode.nextIfTrue)
-        if (!que.contains(conditionNode.nextIfFalse)) que.addLast(conditionNode.nextIfFalse)
-    }
 
     private fun getOutState(
         node : Node,
@@ -140,12 +106,6 @@ internal class ConstantFolding(val root : Node)
         for(key in allKeys)
         {
             val values = states.mapNotNull { it[key] }.toSet()
-            /*result[key] = when
-            {
-                values.isEmpty() -> AValue.Unknown
-                values.size == 1 -> values.first()
-                else             -> AValue.Unknown
-            }*/
             result[key] = if (values.size == 1) {
                 values.first() ?: AValue.Unknown
             } else {
@@ -168,7 +128,7 @@ internal class ConstantFolding(val root : Node)
         }
     }
 
-    private fun evaluate( e: Expr, context : Env) : AValue<Any> = when(e) {
+    private fun evaluate(e: Expr, context : Env) : AValue<Any> = when(e) {
         is Expr.Var     -> context[AEnvVariable.Var(e.name)] ?: AValue.Unknown
         is Expr.Const   -> AValue.Const(e.value)
         is Expr.Plus    -> evaluateBinaryOp(e.left, e.right, context)   { a, b -> a + b }
@@ -200,34 +160,33 @@ internal class ConstantFolding(val root : Node)
         private val cache = mutableMapOf<Node, Node>()
 
         override fun visitAssign(x: Node.Assign): Node {
-            val tempValue = nodesOfVariable[x]!!.get(AEnvVariable.Var(x.variable.name))!!
+            val tempValue = nodesOfVariable.getValue(x).getValue(AEnvVariable.Var(x.variable.name))
             if(!cache.containsKey(x.next))
                 cache[x.next] = x.next.visit(this)
 
 
             if (tempValue is AValue.Const)
-                cache[x] = Node.Assign(x.variable, Expr.Const(tempValue.value), cache[x.next]!!)
+                cache[x] = Node.Assign(x.variable, Expr.Const(tempValue.value), cache.getValue(x.next))
             else
-                cache[x] = Node.Assign(x.variable, x.value, cache[x.next]!!)
-            return cache[x]!!
+                cache[x] = Node.Assign(x.variable, x.value, cache.getValue(x.next))
+            return cache.getValue(x)
         }
 
         override fun visitCycle(X: Node.While): Node {
-            val tempValue = nodesOfVariable[X]!!.get(AEnvVariable.ConstExpr(X))!!
+            val tempValue = nodesOfVariable.getValue(X).getValue(AEnvVariable.ConstExpr(X))
             if (!cache.containsKey(X.join) )
                 cache[X.join] = X.join.visit(this)
 
             if (tempValue is AValue.Const)
-                cache[X] = Node.While(Expr.Const(tempValue.value), Node.Quit, cache[X.join]!!)
+                cache[X] = Node.While(Expr.Const(tempValue.value), Node.Quit, cache.getValue(X.join))
             else
-                cache[X] = Node.While(X.cond, Node.Quit, cache[X.join]!!)
+                cache[X] = Node.While(X.cond, Node.Quit, cache.getValue(X.join))
 
             if(!cache.containsKey(X.body) )
                 cache[X.body] = X.body.visit(this)
 
-            (cache[X]!! as Node.While).body = cache[X.body]!!
-
-            return cache[X]!!
+            (cache.getValue(X) as Node.While).body = cache.getValue(X.body)
+            return cache.getValue(X)
         }
 
         override fun visitConditional(x: Node.Condition): Node {
@@ -239,29 +198,30 @@ internal class ConstantFolding(val root : Node)
             if(!cache.containsKey(x.join) )
                 cache[x.join] = x.join.visit(this)
 
-            val tempValue = nodesOfVariable[x]!!.get(AEnvVariable.ConstExpr(x))!!
+            val tempValue = nodesOfVariable.getValue(x).getValue(AEnvVariable.ConstExpr(x))
             if (tempValue is AValue.Const)
-                cache[x] = Node.Condition(Expr.Const(tempValue.value),
-                    cache[x.nextIfTrue]!!,
-                    cache[x.nextIfFalse]!!,
-                    cache[x.join]!!)
+                cache[x] = Node.Condition(
+                    Expr.Const(tempValue.value),
+                    cache.getValue(x.nextIfTrue),
+                    cache.getValue(x.nextIfFalse),
+                    cache.getValue(x.join))
             else
                 cache[x] = Node.Condition(x.cond,
-                    cache[x.nextIfTrue]!!,
-                    cache[x.nextIfFalse]!!,
-                    cache[x.join]!!)
-            return cache[x]!!
+                    cache.getValue(x.nextIfTrue),
+                    cache.getValue(x.nextIfFalse),
+                    cache.getValue(x.join))
+            return cache.getValue(x)
         }
 
         override fun visitQuit(x: Node.Quit): Node = Node.Quit
 
         override fun visitReturn(x: Node.Return): Node {
-            val tempValue = nodesOfVariable[x]!!.get(AEnvVariable.ConstExpr(x))!!
+            val tempValue = nodesOfVariable.getValue(x).getValue(AEnvVariable.ConstExpr(x))
             if (tempValue is AValue.Const)
                 cache[x] = Node.Return(Expr.Const(tempValue.value))
             else
                 cache[x] = Node.Return(x.result)
-            return cache[x]!!
+            return cache.getValue(x)
         }
     }
 

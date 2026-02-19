@@ -1,9 +1,9 @@
 package org.example.Expression.Visitor
 
-import org.example.Expression.Expr
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import org.example.*
+import org.example.lang.ast.print.InfixExpresionPrinter
 
 internal class InfixExpresionPrinterTest {
 

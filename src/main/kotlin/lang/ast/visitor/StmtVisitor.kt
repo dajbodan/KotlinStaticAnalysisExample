@@ -1,6 +1,6 @@
-package org.example.Statement.Visitor
+package org.example.lang.ast.visitor
 
-import org.example.Statement.Stmt
+import org.example.lang.ast.Stmt
 
 interface StmtVisitor<out T>
 {

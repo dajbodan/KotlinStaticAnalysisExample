@@ -1,6 +1,6 @@
-package org.example.Expression
+package org.example.lang.ast
 
-import org.example.Expression.Visitor.ExprVisitor
+import org.example.lang.ast.visitor.ExprVisitor
 
 sealed interface Expr  {
     fun <V> accept(x: ExprVisitor<V>): V

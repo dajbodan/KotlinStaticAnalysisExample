@@ -1,7 +1,7 @@
-package org.example.Node
+package org.example.lang.cfg
 
-import org.example.Expression.Expr
-import org.example.OrientedGraph.CFGWeights
+import org.example.lang.ast.Expr
+import org.example.infra.graph.CFGWeights
 
 sealed interface Node
 {
@@ -62,7 +62,7 @@ sealed interface Node
     }
 }
 
-fun getSuccessors(node: Node): List<Pair<Node, CFGWeights?>> {
+/*fun getSuccessors(node: Node): List<Pair<Node, CFGWeights?>> {
     return when (node) {
 
         is Node.Assign -> listOf(node.next to null)
@@ -82,4 +82,4 @@ fun getSuccessors(node: Node): List<Pair<Node, CFGWeights?>> {
             node.join to CFGWeights.NO
         )
     }
-}
+}*/

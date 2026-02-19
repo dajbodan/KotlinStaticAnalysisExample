@@ -1,16 +1,15 @@
-package org.example.Controller
+package org.example
 
-
-
-import org.example.ASTConsolePrinter.ASTConsolePrinter
-import org.example.BuilderControlFlowGraph.ControlFlowGraphBuilder
-import org.example.ConstantFolding.ConstantFolding
-import org.example.Mermaid.MermaidBuilder
-import org.example.Mermaid.MermaidGraphType
-import org.example.Node.Node
-import org.example.Node.getSuccessors
-import org.example.Statement.Stmt
-import org.example.Expression.Visitor.InfixExpresionPrinter
+import org.example.analysis.ConstantFolding
+import org.example.infra.graph.CFGWeights
+import org.example.infra.mermaid.MermaidBuilder
+import org.example.infra.mermaid.MermaidGraphType
+import org.example.lang.ast.Stmt
+import org.example.lang.ast.print.ASTConsolePrinter
+import org.example.lang.ast.print.InfixExpresionPrinter
+import org.example.lang.cfg.ControlFlowGraphBuilder
+import org.example.lang.cfg.Node
+//import org.example.lang.cfg.getSuccessors
 
 class Controller(
     private val graphType: MermaidGraphType = MermaidGraphType.GRAPH_TD
@@ -25,7 +24,7 @@ class Controller(
     private fun renderMermaid(entry: Node): String {
         val sb = StringBuilder()
         val mermaid = MermaidBuilder(sb, InfixExpresionPrinter(), graphType)
-        mermaid.renderFromGraph(entry,  { n -> getSuccessors(n) })
+        mermaid.renderFromGraph<Node, CFGWeights>(entry,  { n -> n.successors() })
 
         return sb.toString()
     }

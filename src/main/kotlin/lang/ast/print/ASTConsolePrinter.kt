@@ -1,27 +1,23 @@
-package org.example.ASTConsolePrinter
+package org.example.lang.ast.print
 
-import org.example.Expression.Expr
-import org.example.Expression.Visitor.ExprVisitor
-import org.example.Statement.Stmt
-import org.example.Statement.Visitor.StmtVisitor
-
-
-
-
+import org.example.lang.ast.Expr
+import org.example.lang.ast.Stmt
+import org.example.lang.ast.visitor.ExprVisitor
+import org.example.lang.ast.visitor.StmtVisitor
 
 internal class ASTConsolePrinter(
     private val out: Appendable = System.out
 ) : ExprVisitor<Unit>, StmtVisitor<Unit> {
 
     private var indentLevel = 0
-    private val indentChar = "\t" 
+    private val indentChar = "\t"
 
-  
+
     private fun indent() {
         out.append(indentChar.repeat(indentLevel))
     }
 
-    
+
     private inline fun indented(block: () -> Unit) {
         indentLevel++
         block()

@@ -2,6 +2,8 @@ package org.example.ASTConsolePrinter
 
 import org.example.block
 import org.example.const
+import org.example.lang.ast.Stmt
+import org.example.lang.ast.print.ASTConsolePrinter
 import org.example.plus
 import org.example.v
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -14,7 +16,7 @@ internal class ASTConsolePrinterTest {
         val sb = StringBuilder()
         val printer = ASTConsolePrinter(sb)
         val ast = block(
-            org.example.Statement.Stmt.Assign(v("x"), const(10))
+            Stmt.Assign(v("x"), const(10))
         )
 
         ast.accept(printer)
@@ -35,10 +37,10 @@ internal class ASTConsolePrinterTest {
         val sb = StringBuilder()
         val printer = ASTConsolePrinter(sb)
         val ast = block(
-            org.example.Statement.Stmt.If(
+            Stmt.If(
                 const(true),
-                org.example.Statement.Stmt.Assign(v("y"), const(1)),
-                org.example.Statement.Stmt.Assign(v("z"), plus(v("a"), const(2)))
+                Stmt.Assign(v("y"), const(1)),
+                Stmt.Assign(v("z"), plus(v("a"), const(2)))
             )
         )
         ast.accept(printer)

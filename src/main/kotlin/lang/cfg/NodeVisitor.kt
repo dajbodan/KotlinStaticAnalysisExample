@@ -1,4 +1,4 @@
-package org.example.Node
+package org.example.lang.cfg
 
 interface NodeVisitor<out T> {
     fun visitAssign(x : Node.Assign) : T

@@ -1,11 +1,12 @@
 package org.example.ConstantFolding
 
-import org.example.BuilderControlFlowGraph.ControlFlowGraphBuilder
-import org.example.Expression.Expr
-import org.example.Node.Node
-import org.example.Statement.Stmt
+import org.example.lang.cfg.ControlFlowGraphBuilder
+import org.example.lang.ast.Expr
+import org.example.lang.cfg.Node
+import org.example.lang.ast.Stmt
 import kotlin.test.*
 import org.example.*
+import org.example.analysis.ConstantFolding
 
 internal class ConstantFoldingTest {
 

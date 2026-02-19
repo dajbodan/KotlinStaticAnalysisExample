@@ -1,6 +1,7 @@
-package org.example.Expression.Visitor
+package org.example.lang.ast.print
 
-import org.example.Expression.Expr
+import org.example.lang.ast.Expr
+import org.example.lang.ast.visitor.ExprVisitor
 
 class InfixExpresionPrinter : ExprVisitor<String>
 {

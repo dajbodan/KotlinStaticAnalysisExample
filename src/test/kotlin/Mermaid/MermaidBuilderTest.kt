@@ -1,9 +1,12 @@
 package org.example.Mermaid
 
-import org.example.Expression.Expr
-import org.example.Expression.Visitor.InfixExpresionPrinter
-import org.example.Node.*
-import org.example.OrientedGraph.CFGWeights
+import org.example.lang.ast.Expr
+import org.example.lang.ast.print.InfixExpresionPrinter
+import org.example.infra.graph.CFGWeights
+import org.example.infra.mermaid.MermaidBuilder
+import org.example.infra.mermaid.MermaidGraphType
+import org.example.lang.cfg.Node
+import org.example.lang.cfg.getSuccessors
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import kotlin.test.assertTrue

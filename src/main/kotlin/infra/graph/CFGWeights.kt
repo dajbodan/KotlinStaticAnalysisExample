@@ -1,4 +1,4 @@
-package org.example.OrientedGraph
+package org.example.infra.graph
 
 enum class CFGWeights(val weight : Int)
 {

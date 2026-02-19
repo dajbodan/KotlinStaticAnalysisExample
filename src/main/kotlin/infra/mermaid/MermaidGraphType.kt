@@ -1,4 +1,4 @@
-package org.example.Mermaid
+package org.example.infra.mermaid
 
 enum class MermaidGraphType(val header: String) {
     FLOWCHART_TD("flowchart TD"),

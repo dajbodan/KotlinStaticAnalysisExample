@@ -1,10 +1,9 @@
-package org.example.BuilderControlFlowGraph
+package org.example.lang.cfg
 
-import org.example.Node.*
-import org.example.Statement.Stmt
-import org.example.Statement.Visitor.StmtVisitor
+import org.example.lang.ast.Stmt
+import org.example.lang.ast.visitor.StmtVisitor
 
-internal class ControlFlowGraphBuilder:  StmtVisitor<Node>
+internal class ControlFlowGraphBuilder: StmtVisitor<Node>
 {
     private var  nextNode : Node = Node.Quit
 
@@ -19,14 +18,14 @@ internal class ControlFlowGraphBuilder:  StmtVisitor<Node>
         return Node.Condition(x.cond,  thenBranch,elseBranch, saveAfterIf)
     }
 
-    override fun visitBlock(x: Stmt.Block) : Node  {
+    override fun visitBlock(x: Stmt.Block) : Node {
         x.stmts.asReversed().forEach { nextNode = it.accept(this) }
         return nextNode
     }
     override fun visitReturn(x: Stmt.Return) : Node = Node.Return(x.result)
     override fun visitAssign(x: Stmt.Assign) : Node = Node.Assign(x.variable, x.value, nextNode)
     override fun visitCycle(x: Stmt.While): Node {
-        val cycle = Node.While(x.cond,Node.Quit, nextNode )
+        val cycle = Node.While(x.cond, Node.Quit, nextNode )
         val saveAfterBody = nextNode
         nextNode = cycle
         val cycleTemp = x.body.accept(this)

@@ -1,12 +1,12 @@
 package org.example
 
 
-import org.example.ASTConsolePrinter.ASTConsolePrinter
+import org.example.lang.ast.print.ASTConsolePrinter
 import java.io.File
 
-import org.example.Controller.Controller
-import org.example.Expression.Expr
-import org.example.Statement.Stmt
+import org.example.Controller
+import org.example.lang.ast.Expr
+import org.example.lang.ast.Stmt
 
 
 fun printAst(program: Stmt) {

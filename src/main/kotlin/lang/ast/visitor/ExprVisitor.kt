@@ -1,6 +1,6 @@
-package org.example.Expression.Visitor
+package org.example.lang.ast.visitor
 
-import org.example.Expression.Expr
+import org.example.lang.ast.Expr
 
 interface ExprVisitor<out T>
 {

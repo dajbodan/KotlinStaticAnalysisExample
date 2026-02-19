@@ -6,11 +6,11 @@ N3["If (-126) "]
 N4["Assign y = 1 "]
 N5["Assign y = 1 "]
 N6["Return (251) "]
-    N0 --> N1
-    N1 --> N2
+    N0 -->|Yes| N1
+    N1 -->|Yes| N2
     N2 -->|Yes| N3
     N3 -->|Yes| N4
-    N4 --> N2
-    N3 -->|No| N5
-    N5 --> N2
-    N2 -->|No| N6
+    N4 -->|Yes| N2
+    N3 -->|Yes| N5
+    N5 -->|Yes| N2
+    N2 -->|Yes| N6

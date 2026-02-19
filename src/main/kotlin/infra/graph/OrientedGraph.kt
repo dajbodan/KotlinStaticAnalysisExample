@@ -1,4 +1,4 @@
-package org.example.OrientedGraph
+package org.example.infra.graph
 
 interface OrientedGraph<N, W>
 {

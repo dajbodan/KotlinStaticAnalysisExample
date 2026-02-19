@@ -1,9 +1,9 @@
-package org.example.Mermaid
+package org.example.infra.mermaid
 
-import org.example.Expression.Visitor.InfixExpresionPrinter
-import org.example.Node.*
-import org.example.OrientedGraph.CFGWeights
-import org.example.OrientedGraph.OrientedGraph
+import org.example.lang.ast.print.InfixExpresionPrinter
+import org.example.infra.graph.CFGWeights
+import org.example.infra.graph.OrientedGraph
+import org.example.lang.cfg.Node
 
 
 internal class MermaidBuilder(
@@ -51,7 +51,7 @@ internal class MermaidBuilder(
 
     fun <N, W> renderFromGraph(
         srcNode: N,
-        graphAlgorithm: (N) -> List<Pair<N, W?>>
+        graphAlgorithm: (N) -> List<N>//List<Pair<N, W?>>
     ) where N : Node, W : CFGWeights? {
 
         val visited = mutableSetOf<N>()
@@ -60,7 +60,7 @@ internal class MermaidBuilder(
             if (!visited.contains(node)) {
                 visited.add(node)
                 addNode(node)
-                graphAlgorithm(node).forEach { generateVertices(it.first) }
+                graphAlgorithm(node).forEach { generateVertices(it ) }
             }
         }
 
@@ -69,8 +69,8 @@ internal class MermaidBuilder(
                 visited.add(node)
                 graphAlgorithm(node).forEach {
 
-                    addEdge(node, it.first, it.second)
-                    generateEdges(it.first)
+                    addEdge(node, it, CFGWeights.YES)
+                    generateEdges(it)
                 }
             }
         }
