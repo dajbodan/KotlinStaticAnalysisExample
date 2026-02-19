@@ -108,18 +108,6 @@ internal class ConstantFolding(val root : Node)
     }
 
 
-    private fun tryEvaluateExpr(node : Node, context : Env) : AValue<Any>
-    {
-        return when(node)
-        {
-            is Node.Assign -> evaluate(node.value, context)
-            is Node.Return -> evaluate(node.result, context)
-            is Node.Condition -> evaluate(node.cond, context)
-            is Node.While -> evaluate(node.cond, context)
-            else -> AValue.Unknown
-        }
-    }
-
     private fun evaluate(e: Expr, context : Env) : AValue<Any> = when(e) {
         is Expr.Var     -> context[AEnvVariable.Var(e.name)] ?: AValue.Unknown
         is Expr.Const   -> AValue.Const(e.value)
