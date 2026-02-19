@@ -6,6 +6,7 @@ import org.example.infra.graph.CFGWeights
 sealed interface Node
 {
     fun successors(): List<Node>
+    fun expression(): Expr
     fun forEachRecursive(action: (Node) -> Unit)
     {
         val seen = HashSet<Node>()
@@ -24,13 +25,13 @@ sealed interface Node
         val next: Node
     ) : Node {
         override fun successors(): List<Node> = listOf(next)
-
+        override fun expression(): Expr = value
         override fun <T> visit(visitor: NodeVisitor<T>) = visitor.visitAssign(this)
     }
 
     class Return(val result : Expr) : Node {
         override fun successors(): List<Node> = listOf()
-
+        override fun expression() = result
         override fun <T> visit(visitor: NodeVisitor<T>) = visitor.visitReturn(this)
     }
 
@@ -41,7 +42,7 @@ sealed interface Node
         val join : Node
     ) : Node {
         override fun successors(): List<Node> = listOf(nextIfTrue, nextIfFalse)
-
+        override fun expression() = cond
         override fun <T> visit(visitor: NodeVisitor<T>) = visitor.visitConditional(this)
     }
 
@@ -51,13 +52,13 @@ sealed interface Node
         val join: Node
     ) : Node {
         override fun successors(): List<Node> = listOf(body, join)
-
+        override fun expression() = cond
         override fun <T> visit(visitor: NodeVisitor<T>) = visitor.visitCycle(this)
     }
 
     object Quit: Node {
         override fun successors(): List<Node> = listOf()
-
+        override fun expression(): Expr = throw UnsupportedOperationException("Quit node does not have an expression")
         override fun <T> visit(visitor: NodeVisitor<T>) = visitor.visitQuit(this)
     }
 }
