@@ -20,7 +20,7 @@ internal class ConstantFolding(val root : Node)
 
     private val nodesOfVariable : LinkedHashMap<Node, Env> = linkedMapOf()
 
-    private val predeccesor : LinkedHashMap<Node, MutableList<Node>> = linkedMapOf<Node, MutableList<Node>>()
+    private val predeccesor : LinkedHashMap<Node, MutableList<Node>> = linkedMapOf()
     private val que = ArrayDeque<Node>()
 
     fun run()
@@ -36,7 +36,7 @@ internal class ConstantFolding(val root : Node)
         {
             itNode = que.removeFirst()
             inQueue.remove(itNode)
-            val predecessor = predeccesor[itNode] ?: emptyList<Node>()
+            val predecessor = predeccesor[itNode] ?: emptyList()
             val predOutStates = predecessor.map { envAt(it) }
             val inState = if (itNode == root) {
                 merge(predOutStates + listOf(mutableMapOf()))
@@ -76,7 +76,7 @@ internal class ConstantFolding(val root : Node)
 
     private fun initPredeccesor()
     {
-        root.forEachRecursive { node -> predeccesor[node] = mutableListOf<Node>() }
+        root.forEachRecursive { node -> predeccesor[node] = mutableListOf() }
         root.forEachRecursive { node -> node.successors().forEach { successor -> predeccesor[successor]?.add(node) } }
     }
 
@@ -135,19 +135,17 @@ internal class ConstantFolding(val root : Node)
 
             if (tempValue is AValue.Const)
                 return Node.Assign(x.variable, Expr.Const(tempValue.value), tempNext)
-            else
-                return Node.Assign(x.variable, x.value, tempNext)
+            return Node.Assign(x.variable, x.value, tempNext)
         }
 
         override fun visitCycle(x: Node.While): Node {
             cycles[x]?.let { return it }
             val tempValue = valueAt(x, AEnvVariable.ConstExpr(x))
             val tempJoin = x.next.visit(this)
-            var tempCycle : Node?
-            if (tempValue is AValue.Const)
-                tempCycle = Node.While(Expr.Const(tempValue.value), Node.Quit, tempJoin)
+            val tempCycle = if (tempValue is AValue.Const)
+                Node.While(Expr.Const(tempValue.value), Node.Quit, tempJoin)
             else
-                tempCycle = Node.While(x.cond, Node.Quit, tempJoin)
+                Node.While(x.cond, Node.Quit, tempJoin)
             cycles[x] = tempCycle
             tempCycle.body = x.body.visit(this)
             return tempCycle
@@ -161,8 +159,7 @@ internal class ConstantFolding(val root : Node)
 
             if(tempValue is AValue.Const)
                 return Node.Condition(Expr.Const(tempValue.value), nextIfTrue, nextIfFalse)
-            else
-                return Node.Condition(x.cond, nextIfTrue, nextIfFalse)
+            return Node.Condition(x.cond, nextIfTrue, nextIfFalse)
         }
 
         override fun visitQuit(x: Node.Quit): Node = Node.Quit
