@@ -31,11 +31,11 @@ internal class ConstantFolding(val root : Node)
         var itNode = root
 
         que.addLast(itNode)
-
+        val inQueue : MutableSet<Node> = mutableSetOf(itNode)
         while(!que.isEmpty())
         {
             itNode = que.removeFirst()
-
+            inQueue.remove(itNode)
             val predecessor = predeccesor[itNode] ?: emptyList<Node>()
             val predOutStates = predecessor.map { envAt(it) }
             val inState = if (itNode == root) {
@@ -50,7 +50,7 @@ internal class ConstantFolding(val root : Node)
             if(oldOutState != newOutState)
             {
                 nodesOfVariable[itNode] = newOutState
-                itNode.successors().forEach { if(!que.contains(it)) que.addLast(it) }
+                itNode.successors().forEach { if(!inQueue.contains(it)) que.addLast(it); inQueue.add(it)  }
             }
         }
 
@@ -101,7 +101,7 @@ internal class ConstantFolding(val root : Node)
         is Expr.Eq      -> evaluateBinaryOp(e.left, e.right, context)   { a, b -> a.Equals(b) }
         is Expr.Neq     -> evaluateBinaryOp(e.left, e.right, context)   { a, b -> a.NotEquals(b) }
         is Expr.Lt      -> evaluateBinaryOp(e.left, e.right, context)   { a, b -> a.Lt(b) }
-        else -> error("Missed type in Expr")
+
     }
 
 
@@ -143,7 +143,7 @@ internal class ConstantFolding(val root : Node)
             cycles[X]?.let { return it }
             val tempValue = valueAt(X, AEnvVariable.ConstExpr(X))
             val tempJoin = X.join.visit(this)
-            var tempCycle : Node? = null
+            var tempCycle : Node?
             if (tempValue is AValue.Const)
                 tempCycle = Node.While(Expr.Const(tempValue.value), Node.Quit, tempJoin)
             else
