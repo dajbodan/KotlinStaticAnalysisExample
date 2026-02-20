@@ -53,7 +53,7 @@ class ControlFlowGraphBuilderTest {
 
         val thenHead = cond.nextIfTrue
         val elseHead = cond.nextIfFalse
-        val afterIf = cond.join
+        val afterIf = cond.MergeBlock
 
 
         assertTrue(thenHead is Node.Assign)
@@ -83,7 +83,7 @@ class ControlFlowGraphBuilderTest {
         val entry = ControlFlowGraphBuilder().build(ast)
         val cond = (entry as Node.Assign).next as Node.Condition
 
-        val afterIf = cond.join
+        val afterIf = cond.MergeBlock
         assertTrue(afterIf is Node.Return)
 
         val thenAssign = cond.nextIfTrue as Node.Assign
@@ -119,7 +119,7 @@ class ControlFlowGraphBuilderTest {
         assertSame(cycle, bodyAssign.next)
 
 
-        val after = cycle.join
+        val after = cycle.next
         assertTrue(after is Node.Return)
     }
 

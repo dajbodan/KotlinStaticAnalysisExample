@@ -101,7 +101,7 @@ internal class ConstantFoldingTest {
 
 
         val cond = optCfg as Node.Condition
-        val ret = cond.join as Node.Return
+        val ret = cond.MergeBlock as Node.Return
         cond.assertCondConst(Val.BoolV(true))
         assertTrue(ret.result is Expr.Var)
         assertEquals(v("x"), ret.result)
@@ -122,7 +122,7 @@ internal class ConstantFoldingTest {
         )
         val optCfg = runFold(ast)
         val cond = optCfg as Node.Condition
-        val ret = cond.join as Node.Return
+        val ret = cond.MergeBlock as Node.Return
 
         ret.assertReturnConst(Val.IntV(5))
     }
@@ -155,7 +155,7 @@ internal class ConstantFoldingTest {
 
         cond.assertCondConst(Val.BoolV(true))
 
-        val ret = cond.join
+        val ret = cond.MergeBlock
         ret.assertReturnConst(Val.IntV(9))
     }
 
@@ -188,7 +188,7 @@ internal class ConstantFoldingTest {
         assertTrue(bodyAssign.value is Expr.Plus)
 
 
-        val ret = cycle.join as Node.Return
+        val ret = cycle.next as Node.Return
         assertTrue(ret.result is Expr.Var)
         assertEquals(v("x"), ret.result)
     }
@@ -221,7 +221,7 @@ internal class ConstantFoldingTest {
         val cycle = assign.next as Node.While
         cycle.cond.assertExprConst(Val.BoolV(true))
 
-        val ret = cycle.join as Node.Return
+        val ret = cycle.next as Node.Return
         assertTrue(ret.result is Expr.Var)
         assertEquals(v("x"), ret.result)
     }

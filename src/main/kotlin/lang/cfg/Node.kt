@@ -1,7 +1,6 @@
 package org.example.lang.cfg
 
 import org.example.lang.ast.Expr
-import org.example.infra.graph.CFGWeights
 
 sealed interface Node
 {
@@ -39,7 +38,7 @@ sealed interface Node
         val cond : Expr,
         val nextIfTrue : Node,
         val nextIfFalse : Node,
-        val join : Node
+        val MergeBlock : Node
     ) : Node {
         override fun successors(): List<Node> = listOf(nextIfTrue, nextIfFalse)
         override fun expression() = cond
@@ -49,9 +48,9 @@ sealed interface Node
     class While(
         val cond : Expr,
         var body : Node,
-        val join: Node
+        val next: Node
     ) : Node {
-        override fun successors(): List<Node> = listOf(body, join)
+        override fun successors(): List<Node> = listOf(body, next)
         override fun expression() = cond
         override fun <T> visit(visitor: NodeVisitor<T>) = visitor.visitCycle(this)
     }

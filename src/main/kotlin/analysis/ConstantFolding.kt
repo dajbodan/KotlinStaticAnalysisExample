@@ -142,7 +142,7 @@ internal class ConstantFolding(val root : Node)
         override fun visitCycle(X: Node.While): Node {
             cycles[X]?.let { return it }
             val tempValue = valueAt(X, AEnvVariable.ConstExpr(X))
-            val tempJoin = X.join.visit(this)
+            val tempJoin = X.next.visit(this)
             var tempCycle : Node?
             if (tempValue is AValue.Const)
                 tempCycle = Node.While(Expr.Const(tempValue.value), Node.Quit, tempJoin)
@@ -158,7 +158,7 @@ internal class ConstantFolding(val root : Node)
             val nextIfTrue = x.nextIfTrue.visit(this)
             val nextIfFalse = x.nextIfFalse.visit(this)
             val tempValue = valueAt(x, AEnvVariable.ConstExpr(x))
-            val tempJoin = x.join.visit(this)
+            val tempJoin = x.MergeBlock.visit(this)
             if(tempValue is AValue.Const)
                 return Node.Condition(Expr.Const(tempValue.value), nextIfTrue, nextIfFalse, tempJoin)
             else
