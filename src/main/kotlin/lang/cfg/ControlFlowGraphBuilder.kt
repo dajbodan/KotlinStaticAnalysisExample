@@ -15,7 +15,7 @@ internal class ControlFlowGraphBuilder: StmtVisitor<Node>
         nextNode = saveAfterIf
         val elseBranch =  if (x.elseBranch != null) x.elseBranch.accept(this) else saveAfterIf
         nextNode = saveAfterIf
-        return Node.Condition(x.cond,  thenBranch,elseBranch, saveAfterIf)
+        return Node.Condition(x.cond,  thenBranch,elseBranch)
     }
 
     override fun visitBlock(x: Stmt.Block) : Node {

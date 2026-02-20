@@ -37,8 +37,7 @@ sealed interface Node
     class Condition(
         val cond : Expr,
         val nextIfTrue : Node,
-        val nextIfFalse : Node,
-        val MergeBlock : Node
+        val nextIfFalse : Node
     ) : Node {
         override fun successors(): List<Node> = listOf(nextIfTrue, nextIfFalse)
         override fun expression() = cond

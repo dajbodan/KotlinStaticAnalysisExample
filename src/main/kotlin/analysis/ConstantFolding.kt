@@ -158,11 +158,11 @@ internal class ConstantFolding(val root : Node)
             val nextIfTrue = x.nextIfTrue.visit(this)
             val nextIfFalse = x.nextIfFalse.visit(this)
             val tempValue = valueAt(x, AEnvVariable.ConstExpr(x))
-            val tempJoin = x.MergeBlock.visit(this)
+
             if(tempValue is AValue.Const)
-                return Node.Condition(Expr.Const(tempValue.value), nextIfTrue, nextIfFalse, tempJoin)
+                return Node.Condition(Expr.Const(tempValue.value), nextIfTrue, nextIfFalse)
             else
-                return Node.Condition(x.cond, nextIfTrue, nextIfFalse, tempJoin)
+                return Node.Condition(x.cond, nextIfTrue, nextIfFalse)
         }
 
         override fun visitQuit(x: Node.Quit): Node = Node.Quit
