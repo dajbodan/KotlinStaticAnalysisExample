@@ -51,7 +51,7 @@ internal class MermaidBuilder(
 
     fun <N, W> renderFromGraph(
         srcNode: N,
-        graphAlgorithm: (N) -> List<N>//List<Pair<N, W?>>
+        graphAlgorithm: (N) -> List<Pair<N, W?>>//List<Pair<N, W?>>
     ) where N : Node, W : CFGWeights? {
 
         val visited = mutableSetOf<N>()
@@ -60,7 +60,7 @@ internal class MermaidBuilder(
             if (!visited.contains(node)) {
                 visited.add(node)
                 addNode(node)
-                graphAlgorithm(node).forEach { generateVertices(it ) }
+                graphAlgorithm(node).forEach { generateVertices(it.first ) }
             }
         }
 
@@ -69,8 +69,8 @@ internal class MermaidBuilder(
                 visited.add(node)
                 graphAlgorithm(node).forEach {
 
-                    addEdge(node, it, CFGWeights.YES)
-                    generateEdges(it)
+                    addEdge(node, it.first, it.second)
+                    generateEdges(it.first)
                 }
             }
         }

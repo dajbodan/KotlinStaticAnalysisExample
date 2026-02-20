@@ -1,6 +1,7 @@
 package org.example.lang.ast
 
 import org.example.lang.ast.visitor.ExprVisitor
+import org.example.lang.values.Val
 
 sealed interface Expr  {
     fun <V> accept(x: ExprVisitor<V>): V
@@ -8,7 +9,7 @@ sealed interface Expr  {
 
 
 
-    data class Const(val value: Any) : Expr
+    data class Const(val value: Val) : Expr
     {
         override fun <V> accept(x: ExprVisitor<V>)  = x.visitConst(this)
 

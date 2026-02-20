@@ -1,10 +1,8 @@
-package org.example.Controller
-import org.example.Controller
-import org.example.sampleProgram
+package org.example
+
 import kotlin.test.Test
 import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
-
 
 internal class ControllerTest {
 

@@ -1,12 +1,10 @@
-package org.example.Mermaid
+package org.example.infra.mermaid
 
+import org.example.infra.graph.CFGWeights
 import org.example.lang.ast.Expr
 import org.example.lang.ast.print.InfixExpresionPrinter
-import org.example.infra.graph.CFGWeights
-import org.example.infra.mermaid.MermaidBuilder
-import org.example.infra.mermaid.MermaidGraphType
 import org.example.lang.cfg.Node
-import org.example.lang.cfg.getSuccessors
+import org.example.lang.values.Val
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import kotlin.test.assertTrue
@@ -38,14 +36,14 @@ internal class MermaidBuilderTest {
 
     @Test
     fun `addNode formats an Assign node correctly`() {
-        val node = Node.Assign(Expr.Var("x"), Expr.Const(10), Node.Quit)
+        val node = Node.Assign(Expr.Var("x"), Expr.Const(Val.IntV(10)), Node.Quit)
         builder.addNode(node)
         assertTrue(output.contains("[\"Assign x = 10 \"]"))
     }
 
     @Test
     fun `addNode formats a Return node correctly`() {
-        val node = Node.Return(Expr.Const(123))
+        val node = Node.Return(Expr.Const(Val.IntV(123)))
         builder.addNode(node)
         assertTrue(output.contains("[\"Return (123) \"]"))
     }
@@ -53,7 +51,7 @@ internal class MermaidBuilderTest {
     @Test
     fun `addEdge formats a 'Yes' edge correctly`() {
         val n1 = Node.Quit
-        val n2 = Node.Return(Expr.Const(1))
+        val n2 = Node.Return(Expr.Const(Val.IntV(1)))
 
         builder.addNode(n1)
         builder.addNode(n2)
@@ -65,7 +63,7 @@ internal class MermaidBuilderTest {
     @Test
     fun `addEdge formats a 'No' edge correctly`() {
         val n1 = Node.Quit
-        val n2 = Node.Return(Expr.Const(1))
+        val n2 = Node.Return(Expr.Const(Val.IntV(1)))
 
         builder.addNode(n1)
         builder.addNode(n2)
@@ -76,16 +74,24 @@ internal class MermaidBuilderTest {
 
     @Test
     fun `renderFromGraph traverses and builds a full graph`() {
-        val ret = Node.Return(Expr.Const(1))
-        val assign = Node.Assign(Expr.Var("x"), Expr.Const(10), ret)
+        val ret = Node.Return(Expr.Const(Val.IntV(1)))
+        val assign = Node.Assign(Expr.Var("x"), Expr.Const(Val.IntV(10)), ret)
 
-        builder.renderFromGraph<Node, CFGWeights>(srcNode = assign) { n -> getSuccessors(node = n) }
+        builder.renderFromGraph<Node, CFGWeights>(srcNode = assign) { n -> n.successors().map { succ ->
+            when (n) {
+                is Node.Assign    -> succ to null
+                is Node.While     -> succ to if(succ == n.body) CFGWeights.YES else CFGWeights.NO
+                is Node.Condition -> succ to if(succ == n.nextIfTrue) CFGWeights.YES else CFGWeights.NO
+                is Node.Return    -> succ to null
+                is Node.Quit      -> succ to null
+            }
+        }}
 
         assertTrue(output.contains("graph TD"))
 
         assertTrue(output.contains("[\"Assign x = 10 \"]"))
         assertTrue(output.contains("[\"Return (1) \"]"))
-        
+
         assertTrue(output.contains("N0 --> N1"))
     }
 }

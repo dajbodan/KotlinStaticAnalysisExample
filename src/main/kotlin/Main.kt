@@ -7,6 +7,7 @@ import java.io.File
 import org.example.Controller
 import org.example.lang.ast.Expr
 import org.example.lang.ast.Stmt
+import org.example.lang.values.Val
 
 
 fun printAst(program: Stmt) {
@@ -16,18 +17,18 @@ fun printAst(program: Stmt) {
 
 fun sampleProgram(): Stmt =
     Stmt.Block(
-        listOf(Stmt.Assign(Expr.Var("x"), Expr.Const(125)),
-            Stmt.Assign(Expr.Var("a"), Expr.Mul(Expr.Minus(Expr.Const(1), Expr.Const(2)), Expr.Plus(Expr.Var("x"), Expr.Const(1)))),
-            Stmt.While(Expr.Eq(Expr.Plus(Expr.Var("x"), Expr.Const(2)), Expr.Plus(Expr.Var("a"), Expr.Const(5)))
+        listOf(Stmt.Assign(Expr.Var("x"), Expr.Const(Val.IntV(125))),
+            Stmt.Assign(Expr.Var("a"), Expr.Mul(Expr.Minus(Expr.Const(Val.IntV(1)), Expr.Const(Val.IntV(2))), Expr.Plus(Expr.Var("x"), Expr.Const(Val.IntV(1))))),
+            Stmt.While(Expr.Eq(Expr.Plus(Expr.Var("x"), Expr.Const(Val.IntV(2))), Expr.Plus(Expr.Var("a"), Expr.Const(Val.IntV(5))))
                 ,Stmt.If(
                     Expr.Var("a"),
-                    Stmt.Assign(Expr.Var("y"), Expr.Mul(Expr.Const(1), Expr.Const(1))),
-                    Stmt.Assign(Expr.Var("y"), Expr.Const(1))
+                    Stmt.Assign(Expr.Var("y"), Expr.Mul(Expr.Const(Val.IntV(1)), Expr.Const(Val.IntV(1)))),
+                    Stmt.Assign(Expr.Var("y"), Expr.Const(Val.IntV(1)))
                 )),
 
             Stmt.Return(
                 Expr.Plus(
-                    Expr.Mul(Expr.Var("x"), Expr.Const(2)),
+                    Expr.Mul(Expr.Var("x"), Expr.Const(Val.IntV(2))),
                     Expr.Var("y")
                 )
             )

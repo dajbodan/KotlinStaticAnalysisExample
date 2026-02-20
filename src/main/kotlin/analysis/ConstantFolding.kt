@@ -3,14 +3,12 @@ package org.example.analysis
 import org.example.lang.ast.Expr
 import org.example.lang.cfg.Node
 import org.example.lang.cfg.NodeVisitor
+import org.example.lang.values.*
 import java.util.Collections.emptyMap
 
 internal class ConstantFolding(val root : Node)
 {
-    private sealed interface AValue<out T> {
-        data class Const<T>(val value: T) : AValue<T>
-        object Unknown : AValue<Nothing>
-    }
+
 
     private sealed interface AEnvVariable
     {
@@ -18,7 +16,7 @@ internal class ConstantFolding(val root : Node)
         data class ConstExpr(val node : Node) : AEnvVariable
     }
 
-    private typealias Env = MutableMap<AEnvVariable, AValue<Any>>
+    private typealias Env = MutableMap<AEnvVariable, AValue<Val>>
 
     private val nodesOfVariable : LinkedHashMap<Node, Env> = linkedMapOf()
 
@@ -39,9 +37,7 @@ internal class ConstantFolding(val root : Node)
             itNode = que.removeFirst()
 
             val predecessor = predeccesor[itNode] ?: emptyList<Node>()
-
             val predOutStates = predecessor.map { envAt(it) }
-
             val inState = if (itNode == root) {
                 merge(predOutStates + listOf(mutableMapOf()))
             } else {
@@ -76,67 +72,59 @@ internal class ConstantFolding(val root : Node)
             outState[AEnvVariable.ConstExpr(node)] = evaluated
         return outState
     }
-    private fun initStates()
-    {
-        root.forEachRecursive { node -> nodesOfVariable[node] = mutableMapOf() }
-    }
+    private fun initStates() = root.forEachRecursive { node -> nodesOfVariable[node] = mutableMapOf() }
 
     private fun initPredeccesor()
     {
         root.forEachRecursive { node -> predeccesor[node] = mutableListOf<Node>() }
-
         root.forEachRecursive { node -> node.successors().forEach { successor -> predeccesor[successor]?.add(node) } }
     }
 
-    private fun merge( states : List<Env>) : Env
-    {
-        var result = mutableMapOf<AEnvVariable, AValue<Any>>()
-        val allKeys = states.fold(setOf<AEnvVariable>()) { acc, env -> acc + env.keys }
-        for(key in allKeys)
-        {
-            val values = states.mapNotNull { it[key] }.toSet()
-            result[key] = if (values.size == 1) {
-                values.first()
-            } else {
-                AValue.Unknown
-            }
+    private fun merge(states: List<Env>): Env {
+        val result = mutableMapOf<AEnvVariable, AValue<Val>>()
+        val allKeys = states.fold(emptySet<AEnvVariable>()) { acc, env -> acc + env.keys }
+        for (key in allKeys) {
+            val merged = states.map { env -> env[key] ?: AValue.Unknown }.toSet()
+            result[key] = if (merged.size == 1) merged.first() else AValue.Unknown
         }
         return result
     }
 
 
 
-    private fun evaluate(e: Expr, context : Env) : AValue<Any> = when(e) {
+    private fun evaluate(e: Expr, context : Env) : AValue<Val> = when(e) {
         is Expr.Var     -> context[AEnvVariable.Var(e.name)] ?: AValue.Unknown
         is Expr.Const   -> AValue.Const(e.value)
         is Expr.Plus    -> evaluateBinaryOp(e.left, e.right, context)   { a, b -> a + b }
         is Expr.Minus   -> evaluateBinaryOp(e.left, e.right, context)   { a, b -> a - b }
         is Expr.Mul     -> evaluateBinaryOp(e.left, e.right, context)   { a, b -> a * b }
-        is Expr.Eq      -> evaluateBinaryOp(e.left, e.right, context)   { a, b -> if (a == b) true else false }
-        is Expr.Neq     -> evaluateBinaryOp(e.left, e.right, context)   { a, b -> if (a != b) true else false }
-        is Expr.Lt      -> evaluateBinaryOp(e.left, e.right, context)   { a, b -> if (a < b)  true else false }
+        is Expr.Eq      -> evaluateBinaryOp(e.left, e.right, context)   { a, b -> a.Equals(b) }
+        is Expr.Neq     -> evaluateBinaryOp(e.left, e.right, context)   { a, b -> a.NotEquals(b) }
+        is Expr.Lt      -> evaluateBinaryOp(e.left, e.right, context)   { a, b -> a.Lt(b) }
         else -> error("Missed type in Expr")
     }
 
 
-    private inline fun <R : Any> evaluateBinaryOp(leftExpr : Expr,
+    private inline fun evaluateBinaryOp(leftExpr : Expr,
                                                   rightExpr : Expr,
-                                                  context : MutableMap<AEnvVariable, AValue<Any>>,
-                                                  op : (Int, Int) -> R ) : AValue<Any>
+                                                  context : MutableMap<AEnvVariable, AValue<Val>>,
+                                                  op : (Val, Val) -> AValue<Val>) : AValue<Val>
     {
 
         val left = evaluate(leftExpr, context)
         val right = evaluate(rightExpr, context)
-        if (left is AValue.Const && right is AValue.Const && left.value is Int && right.value is Int) {
-            return AValue.Const(op(left.value, right.value))
-        }
+        if (left is AValue.Const && right is AValue.Const)
+            return op(left.value, right.value)
         return AValue.Unknown
     }
     private fun envAt(n: Node): Env =
         nodesOfVariable[n] ?: emptyMap()
 
-    private fun valueAt(n: Node, key: AEnvVariable): AValue<Any> =
+    private fun valueAt(n: Node, key: AEnvVariable): AValue<Val> =
         envAt(n)[key] ?: AValue.Unknown
+
+
+
     private inner class ConstantFoldingVisitor() : NodeVisitor<Node>
     {
         private val cycles = mutableMapOf<Node, Node>()
@@ -188,5 +176,4 @@ internal class ConstantFolding(val root : Node)
 
         }
     }
-
 }

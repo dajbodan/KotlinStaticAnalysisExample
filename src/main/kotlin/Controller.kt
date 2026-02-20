@@ -24,7 +24,17 @@ class Controller(
     private fun renderMermaid(entry: Node): String {
         val sb = StringBuilder()
         val mermaid = MermaidBuilder(sb, InfixExpresionPrinter(), graphType)
-        mermaid.renderFromGraph<Node, CFGWeights>(entry,  { n -> n.successors() })
+        mermaid.renderFromGraph(entry,  {
+            n -> n.successors().map { succ ->
+                when (n) {
+                    is Node.Assign    -> succ to null
+                    is Node.While     -> succ to if(succ == n.body) CFGWeights.YES else CFGWeights.NO
+                    is Node.Condition -> succ to if(succ == n.nextIfTrue) CFGWeights.YES else CFGWeights.NO
+                    is Node.Return    -> succ to null
+                    is Node.Quit      -> succ to null
+                }
+            }
+        })
 
         return sb.toString()
     }
