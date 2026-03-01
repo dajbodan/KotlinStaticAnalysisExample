@@ -51,7 +51,7 @@ internal class MermaidBuilder(
 
     fun <N, W> renderFromGraph(
         srcNode: N,
-        graphAlgorithm: (N) -> List<Pair<N, W?>>//List<Pair<N, W?>>
+        graphAlgorithm: (N) -> List<Pair<N, W?>>
     ) where N : Node, W : CFGWeights? {
 
         val visited = mutableSetOf<N>()
