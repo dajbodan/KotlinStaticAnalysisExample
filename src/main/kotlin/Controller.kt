@@ -9,7 +9,7 @@ import org.example.lang.ast.print.ASTConsolePrinter
 import org.example.lang.ast.print.InfixExpresionPrinter
 import org.example.lang.cfg.ControlFlowGraphBuilder
 import org.example.lang.cfg.Node
-//import org.example.lang.cfg.getSuccessors
+
 
 class Controller(
     private val graphType: MermaidGraphType = MermaidGraphType.GRAPH_TD
